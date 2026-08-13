@@ -162,3 +162,12 @@ html {
     font-family: var(--font-sans);
   }
 }
+
+/* Ocultar controles de video en navegadores webkit (Chrome, Safari, Edge) */
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-panel {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
