@@ -19,7 +19,7 @@ export const BRAND = {
 
 export const HERO = {
   // 👇 Cambia esta URL por tu video
-  videoUrl: "/src/assets/Athletes_running_on_track_202608130008.mp4",
+  videoUrl: "/public/Athletes_running_on_track_202608130008.mp4",
   // posterUrl: servicePlans,
   ratingText: "200+ MIEMBROS ACTIVOS",
   title: "ASTREA SE MUEVE 2.0",
@@ -38,11 +38,11 @@ export const HERO = {
 // };
 
 export const MARQUEE_ITEMS = [
- "PLANES DE ENTRENAMIENTO",
+ "ASTREA SE MUEVE 2.0",
 
-"ANÁLISIS TÉCNICO",
+"KIT DE CARRERA",
 
-"ESTRATEGIAS DE CARRERA",
+"EXCELENTES PREMIOS",
 ];
 
 // export const SERVICES = {
