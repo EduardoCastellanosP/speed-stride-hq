@@ -4,7 +4,7 @@ export function Marquee() {
   const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
 
   return (
-    <div className="overflow-hidden bg-accent py-3">
+    <div className="overflow-hidden bg-accent py-3 mb-6">
       <div className="flex w-max animate-marquee items-center gap-8 whitespace-nowrap">
         {[0, 1].map((dup) => (
           <div key={dup} className="flex items-center gap-8">

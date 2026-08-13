@@ -42,18 +42,18 @@ export function Navbar() {
 
         <div className="flex items-center justify-end gap-3">
           <a
-            href="#contact"
+            href="#about"
             className="hidden rounded-full border border-foreground/60 px-5 py-2 text-xs font-bold tracking-[0.15em] text-foreground transition-colors hover:border-accent hover:bg-accent hover:text-accent-foreground sm:inline-flex"
           >
             {BRAND.ctaNav}
           </a>
-          <button
+          {/* <button
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
             className="text-foreground md:hidden"
           >
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          </button> */}
         </div>
       </nav>
 

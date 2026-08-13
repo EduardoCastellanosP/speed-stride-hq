@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { Send, Sparkles, ArrowLeft, QrCode, CheckCircle2 } from "lucide-react";
+import { Send, Sparkles, ArrowLeft, QrCode, CheckCircle2, FileText, X, Download } from "lucide-react";
+import qrNequi from "@/assets/Qr recortado.png";
 
 export function WhyUs() {
-  // Estado para controlar los pasos: 1 = Formulario, 2 = Pago con QR
+  // Estados para controlar los pasos (1: Formulario, 2: Pago) y el modal de políticas
   const [step, setStep] = useState<1 | 2>(1);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   // Estados de todos los campos del formulario
   const [formData, setFormData] = useState({
@@ -30,7 +32,6 @@ export function WhyUs() {
     }
   };
 
-  // Validación estricta del Paso 1
   const isFormValid =
     formData.consentimiento === true &&
     formData.nombre.trim() !== "" &&
@@ -48,26 +49,26 @@ export function WhyUs() {
   };
 
  const handleSendToWhatsApp = () => {
-    const phoneNumber = "573023917253";
+    const phoneNumber = "573023917253"; // Número de WhatsApp del organizador (con código de país)
     const text = 
-      `*INSCRIPCIÓN OFICIAL - ASTREA SE MUEVE 2.0*%0A%0A` +
-      `👤 *Nombre:* ${formData.nombre}%0A` +
-      `📄 *Documento:* ${formData.tipoDocumento}%0A` +
-      `🎂 *Edad:* ${formData.edad} años%0A` +
-      `🚻 *Género:* ${formData.genero}%0A` +
-      `👕 *Talla:* ${formData.talla}%0A` +
-      `📱 *Teléfono:* ${formData.telefono}%0A` +
-      `🚨 *Contacto Emergencia:* ${formData.telefonoEmergencia}%0A` +
-      `🏥 *EPS:* ${formData.eps}%0A` +
-      `🩸 *Tipo de Sangre:* ${formData.tipoSangre}%0A` +
-      `⚠️ *Enfermedad / Alergia:* ${formData.enfermedad}%0A` +
-      `✅ *Consentimiento:* ${formData.consentimiento ? "Sí aceptado" : "No aceptado"}%0A%0A` +
-      `_¡Pago realizado! Adjunto mi comprobante por este medio._`;
+     `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
+      `\u{1F464} *Nombre:* ${formData.nombre}\n` +
+      `\u{1F4C4} *Documento:* ${formData.tipoDocumento}\n` +
+      `\u{1F382} *Edad:* ${formData.edad} anos\n` +
+      `\u{1F6BB} *Genero:* ${formData.genero}\n` +
+      `\u{1F455} *Talla:* ${formData.talla}\n` +
+      `\u{1F4F1} *Telefono:* ${formData.telefono}\n` +
+      `\u{1F6A8} *Contacto de Emergencia:* ${formData.telefonoEmergencia}\n` +
+      `\u{1F3E5} *EPS:* ${formData.eps}\n` +
+      `\u{1FA78} *Tipo de Sangre:* ${formData.tipoSangre}\n` +
+      `\u{26A0}\u{FE0F} *Enfermedad o Alergia:* ${formData.enfermedad}\n` +
+      `\u{2705} *Consentimiento:* Aceptado (Terminos y Exoneracion leidos)\n\n` +
+      `_Pago realizado. Adjunto mi comprobante por este medio._`;
 
-    window.open(`https://wa.me/${phoneNumber}?text=${text}`, "_blank");
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`, "_blank");
   };
   return (
-    <section id="about" className="bg-background px-5 pb-24 md:px-8 md:pb-32">
+    <section id="about" className="bg-background px-5 pb-24 md:px-8 md:pb-32 relative">
       <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card/40 p-6 md:p-12">
         
         {/* ENCABEZADO */}
@@ -82,7 +83,7 @@ export function WhyUs() {
           <p className="mt-2 text-sm text-muted-foreground">
             {step === 1 
               ? "Completa todos los campos obligatorios para avanzar." 
-              : "Escanea el código QR y envía tu comprobante."}
+              : "Escanea el código QR de Nequi o descárgalo para pagar."}
           </p>
         </div>
 
@@ -268,7 +269,7 @@ export function WhyUs() {
               />
             </div>
 
-            {/* Casilla de Consentimiento */}
+            {/* Casilla de Consentimiento con Enlace al Modal */}
             <div className="flex items-start gap-3 pt-2">
               <input
                 type="checkbox"
@@ -279,8 +280,16 @@ export function WhyUs() {
                 onChange={handleChange}
                 className="mt-1 h-4 w-4 rounded border-border accent-accent text-accent-foreground focus:ring-accent cursor-pointer"
               />
-              <label htmlFor="consentimiento" className="text-xs text-muted-foreground cursor-pointer leading-relaxed">
-                Acepto el <span className="text-foreground font-semibold underline">consentimiento informado</span>, el tratamiento de mis datos personales y declaro estar en condiciones óptimas de salud para participar en las actividades. *
+              <label htmlFor="consentimiento" className="text-xs text-muted-foreground leading-relaxed">
+                He leído y acepto el{" "}
+                <button
+                  type="button"
+                  onClick={() => setShowConsentModal(true)}
+                  className="text-foreground font-semibold underline hover:text-accent transition-colors inline-block cursor-pointer"
+                >
+                  consentimiento informado y exoneración de responsabilidad
+                </button>{" "}
+                para participar en el evento. *
               </label>
             </div>
 
@@ -307,23 +316,36 @@ export function WhyUs() {
               <div className="bg-accent/10 p-3 rounded-full mb-3">
                 <QrCode className="w-8 h-8 text-accent" />
               </div>
-              <h3 className="text-lg font-bold text-foreground">Realizar el pago aquí</h3>
+              <h3 className="text-lg font-bold text-foreground">Escanea tu código Nequi</h3>
               <p className="text-xs text-muted-foreground mt-1 mb-4">
-                Escanea el código QR con tu aplicación bancaria para realizar el pago de tu inscripción.
+                Escanea el código QR desde tu app Nequi o descárgalo para realizar el pago.
               </p>
+              <h2 className="text-2xl font-black text-accent mb-4">Llave Bre-b <br /> 3023917253</h2>
 
-              {/* Contenedor del código QR (Aquí puedes reemplazar este div por tu etiqueta <img src="tu-qr.png" /> cuando lo tengas) */}
-              <div className="w-48 h-48 bg-white rounded-xl border-4 border-border flex items-center justify-center p-2 shadow-inner">
-                <div className="text-black font-bold text-xs text-center border-2 border-dashed border-gray-400 w-full h-full flex items-center justify-center p-2">
-                  [ Aquí va tu Imagen QR de Pago ]
-                </div>
+              {/* Contenedor del código QR optimizado */}
+              <div className="w-56 h-56 bg-[#280D3B] rounded-2xl border-4 border-border flex items-center justify-center p-3 shadow-inner overflow-hidden relative">
+                <img 
+                  src={qrNequi} 
+                  alt="QR Nequi Katiusca Sepulveda" 
+                  className="w-full h-full object-contain rounded-xl" 
+                />
               </div>
+
+              {/* Botón para descargar el QR directamente */}
+              <a 
+                href={qrNequi} 
+                download="QR-Nequi-Katiusca.jpg"
+                className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent bg-accent/10 hover:bg-accent/20 px-4 py-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Descargar Imagen QR
+              </a>
             </div>
 
             <div className="bg-accent/5 border border-accent/20 p-4 rounded-xl text-left max-w-md mx-auto flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-accent shrink-0 mt-0.5" />
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Una vez realizado el pago, haz clic en el botón de abajo. Se abrirá tu WhatsApp con todos tus datos registrados, y <strong className="text-foreground">deberás enviar tu comprobante de pago por el chat</strong>.
+                Una vez realizado el pago, haz clic en el botón de abajo. Se abrirá tu WhatsApp con todos tus datos registrados, y <strong className="text-foreground">deberás adjuntar tu comprobante de pago por el chat</strong>.
               </p>
             </div>
 
@@ -352,6 +374,71 @@ export function WhyUs() {
         )}
 
       </div>
+
+      {/* ================= MODAL DE CONSENTIMIENTO INFORMADO Y EXONERACIÓN ================= */}
+      {showConsentModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl relative">
+            
+            {/* Cabecera del Modal */}
+            <div className="flex items-center justify-between border-b border-border pb-4 mb-4">
+              <div className="flex items-center gap-2 text-foreground">
+                <FileText className="w-5 h-5 text-accent" />
+                <h3 className="font-black text-lg uppercase tracking-wider">Consentimiento Informado y Exoneración</h3>
+              </div>
+              <button
+                onClick={() => setShowConsentModal(false)}
+                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Texto Legal (Scrollable) */}
+            <div className="overflow-y-auto space-y-4 text-xs md:text-sm text-muted-foreground pr-2 leading-relaxed">
+              <p className="font-semibold text-foreground">
+                Por medio del presente documento, declaro que conozco y acepto los términos y condiciones de participación para el evento deportivo.
+              </p>
+              
+              <p>
+                <strong>1. Exoneración de Responsabilidad:</strong> Reconozco y acepto voluntariamente que la práctica de actividades deportivas conlleva riesgos físicos inherentes. Por lo tanto, <strong>los organizadores, patrocinadores, directores y colaboradores del evento NO se hacen responsables</strong> por accidentes, lesiones físicas, incapacidades, daños materiales, pérdida de pertenencias, ni por ningún tipo de perjuicio personal o de terceros que pueda sufrir antes, durante o después de la carrera.
+              </p>
+
+              <p>
+                <strong>2. Estado de Salud Óptimo:</strong> Certifico bajo la gravedad del juramento que me encuentro en condiciones físicas, médicas y psicológicas óptimas para participar en este evento deportivo. Eximo a la organización de cualquier reclamación derivada de afecciones médicas preexistentes o emergencias de salud que surjan durante el recorrido.
+              </p>
+
+              <p>
+                <strong>3. Atención Médica de Emergencia:</strong> Autorizo al equipo organizador y al personal médico presente a brindarme primeros auxilios y a realizar traslados hospitalarios de emergencia en caso de ser necesario, asumiendo los costos médicos que esto pueda generar.
+              </p>
+
+              <p>
+                <strong>4. Uso de Imagen:</strong> Autorizo de manera libre, voluntaria y gratuita a la organización para capturar y utilizar fotografías, videos y material audiovisual de mi participación en el evento con fines promocionales y de difusión pública.
+              </p>
+
+              <p className="pt-2 text-foreground font-medium">
+                Al marcar la casilla de aceptación en el formulario, confirmo que he leído detenidamente este documento, comprendo su contenido en su totalidad y asumo la responsabilidad absoluta de mi participación.
+              </p>
+            </div>
+
+            {/* Pie del Modal */}
+            <div className="border-t border-border pt-4 mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, consentimiento: true });
+                  setShowConsentModal(false);
+                }}
+                className="px-6 py-3 rounded-xl bg-accent text-accent-foreground font-bold uppercase tracking-[0.1em] text-xs hover:scale-105 transition-all cursor-pointer shadow-lg shadow-accent/20"
+              >
+                Aceptar y Cerrar
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }

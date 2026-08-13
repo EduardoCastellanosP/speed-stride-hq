@@ -36,7 +36,7 @@ function Index() {
       <Marquee />
       {/* <Services /> */}
       <WhyUs />
-      <Founder />
+      {/* <Founder /> */}
     </main>
   );
 }

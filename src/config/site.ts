@@ -13,9 +13,7 @@ export const BRAND = {
   name: "WhyUs",
   links: [
     { label: "HOME", href: "#home" },
-    { label: "INFORMACION", href: "#about" },
-    { label: "PRECIO", href: "#pricing" },
-    { label: "CONTACTO", href: "#contact" },
+    { label: "INSCRIPCIÓN", href: "#about" },
   ],
 };
 
@@ -26,7 +24,7 @@ export const HERO = {
   ratingText: "200+ MIEMBROS ACTIVOS",
   title: "ASTREA SE MUEVE 2.0",
   subtitle: "Corremos por salud, por pasión y por diversión. Únete a nuestra comunidad y mejora tu rendimiento.",
-  cta: "APARTA TU LUGAR", Href: "#contact",
+  cta: "APARTA TU LUGAR", href: "#about",
   
 };
 
@@ -115,18 +113,18 @@ export const WHY_US = {
   ],
 };
 
-export const FOUNDER = {
-  eyebrow: "Meet the Founder",
-  image: founderImage,
-  name: "ADRIAN PRATAMA",
-  role: "Founder",
-  title: "BUILT ON EXPERIENCE. DRIVEN BY PURPOSE.",
-  paragraph:
-    "With 7 years of coaching experience, Coach Adrian Pratama founded this service to make high-quality coaching more personal, accessible, and effective. His approach is built on a simple belief: real progress comes from the right mindset, the right method, and the right support.",
-  badges: [
-    "RRCA Certified",
-    "UESCA Certified",
-    "NASM Certified",
-    "USATF Level 3",
-  ],
-};
+// export const FOUNDER = {
+//   eyebrow: "Meet the Founder",
+//   image: founderImage,
+//   name: "ADRIAN PRATAMA",
+//   role: "Founder",
+//   title: "BUILT ON EXPERIENCE. DRIVEN BY PURPOSE.",
+//   paragraph:
+//     "With 7 years of coaching experience, Coach Adrian Pratama founded this service to make high-quality coaching more personal, accessible, and effective. His approach is built on a simple belief: real progress comes from the right mindset, the right method, and the right support.",
+//   badges: [
+//     "RRCA Certified",
+//     "UESCA Certified",
+//     "NASM Certified",
+//     "USATF Level 3",
+//   ],
+// };
