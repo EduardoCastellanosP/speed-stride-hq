@@ -52,8 +52,7 @@ export function Navbar() {
             aria-label="Toggle menu"
             className="text-foreground md:hidden"
           >
-            {open ? <Menu className="h-6 w-6" /> : <X className="hidden" />}
-            {open ? null : <Menu className="h-6 w-6" />}
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </nav>
