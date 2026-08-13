@@ -7,11 +7,11 @@ export function Hero() {
       <video
         className="absolute inset-0 h-full w-full object-cover"
         src={HERO.videoUrl}
-        poster={HERO.posterUrl}
         autoPlay
         loop
         muted
         playsInline
+        preload="auto"
       />
       <div className="absolute inset-0 bg-black/40" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />

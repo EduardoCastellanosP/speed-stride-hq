@@ -7,11 +7,12 @@ export function WhyUs() {
   const [step, setStep] = useState<1 | 2>(1);
   const [showConsentModal, setShowConsentModal] = useState(false);
 
-  // Estados de todos los campos del formulario
+  // Estados de todos los campos del formulario (incluyendo numeroDocumento)
   const [formData, setFormData] = useState({
     consentimiento: false,
     nombre: "",
     tipoDocumento: "CC",
+    numeroDocumento: "",
     edad: "",
     genero: "Masculino",
     talla: "M",
@@ -35,6 +36,7 @@ export function WhyUs() {
   const isFormValid =
     formData.consentimiento === true &&
     formData.nombre.trim() !== "" &&
+    formData.numeroDocumento.trim() !== "" &&
     formData.edad.trim() !== "" &&
     formData.telefono.trim() !== "" &&
     formData.telefonoEmergencia.trim() !== "" &&
@@ -48,12 +50,12 @@ export function WhyUs() {
     }
   };
 
- const handleSendToWhatsApp = () => {
+  const handleSendToWhatsApp = () => {
     const phoneNumber = "573023917253"; // Número de WhatsApp del organizador (con código de país)
     const text = 
-     `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
+      `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
       `\u{1F464} *Nombre:* ${formData.nombre}\n` +
-      `\u{1F4C4} *Documento:* ${formData.tipoDocumento}\n` +
+      `\u{1F4C4} *Documento:* ${formData.tipoDocumento} - ${formData.numeroDocumento}\n` +
       `\u{1F382} *Edad:* ${formData.edad} anos\n` +
       `\u{1F6BB} *Genero:* ${formData.genero}\n` +
       `\u{1F455} *Talla:* ${formData.talla}\n` +
@@ -67,6 +69,7 @@ export function WhyUs() {
 
     window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`, "_blank");
   };
+
   return (
     <section id="about" className="bg-background px-5 pb-24 md:px-8 md:pb-32 relative">
       <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card/40 p-6 md:p-12">
@@ -107,8 +110,8 @@ export function WhyUs() {
               />
             </div>
 
-            {/* Fila: Tipo de Documento y Edad */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fila: Tipo de Documento, Número de Documento y Edad */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
                   Tipo de Documento *
@@ -119,11 +122,26 @@ export function WhyUs() {
                   onChange={handleChange}
                   className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
                 >
-                  <option value="CC">Cédula de Ciudadanía (CC)</option>
+                  <option value="CC">Cédula (CC)</option>
                   <option value="TI">Tarjeta de Identidad (TI)</option>
-                  <option value="CE">Cédula de Extranjería (CE)</option>
+                  <option value="CE">Cédula Extranjería (CE)</option>
                   <option value="Pasaporte">Pasaporte</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                  Nº de Documento *
+                </label>
+                <input
+                  type="text"
+                  name="numeroDocumento"
+                  required
+                  value={formData.numeroDocumento}
+                  onChange={handleChange}
+                  placeholder="Ej. 1098765432"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                />
               </div>
 
               <div>
