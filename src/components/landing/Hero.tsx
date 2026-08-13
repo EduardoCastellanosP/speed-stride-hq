@@ -1,23 +1,43 @@
+"use client";
+
+import { useState } from "react";
 import { ArrowRight, Star } from "lucide-react";
 import { HERO } from "@/config/site";
 
 export function Hero() {
+  const [isVideoReady, setIsVideoReady] = useState(false);
+
   return (
     <section id="home" className="relative flex min-h-screen items-center overflow-hidden">
+      
+      {/* 1. IMAGEN DE RESPALDO (POSTER PERSONALIZADO) */}
+      {/* Se muestra al instante y se desvanece suavemente cuando el video arranca */}
+      <img
+        src={HERO.posterUrl as string}
+        alt="Hero Background"
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out z-10 ${
+          isVideoReady ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      />
+
+      {/* 2. VIDEO DE FONDO */}
       <video
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover z-0"
         src={HERO.videoUrl}
-        poster={HERO.posterUrl}
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
+        onPlay={() => setIsVideoReady(true)}
       />
-      <div className="absolute inset-0 bg-black/40" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
 
-      <div className="relative mx-auto w-full max-w-7xl px-5 pt-32 pb-24 md:px-8">
+      {/* 3. CAPAS DE DISEÑO Y OSCURECIMIENTO */}
+      <div className="absolute inset-0 bg-black/40 z-20 pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent z-20 pointer-events-none" />
+
+      {/* 4. CONTENIDO DE LA HERO */}
+      <div className="relative z-30 mx-auto w-full max-w-7xl px-5 pt-32 pb-24 md:px-8">
         <div className="flex items-center gap-3">
           <div className="flex gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
