@@ -9,7 +9,7 @@ export function WhyUs() {
   const [formData, setFormData] = useState({
     consentimiento: false,
     nombre: "",
-    distancia: "", // <-- NUEVO ESTADO
+    distancia: "",
     tipoDocumento: "CC",
     numeroDocumento: "",
     edad: "",
@@ -32,11 +32,10 @@ export function WhyUs() {
     }
   };
 
-  // Validamos que el campo distancia también esté lleno
   const isFormValid =
     formData.consentimiento === true &&
     formData.nombre.trim() !== "" &&
-    formData.distancia !== "" && // <-- VALIDACIÓN AGREGADA
+    formData.distancia !== "" &&
     formData.numeroDocumento.trim() !== "" &&
     formData.edad.trim() !== "" &&
     formData.telefono.trim() !== "" &&
@@ -52,11 +51,11 @@ export function WhyUs() {
   };
 
   const handleSendToWhatsApp = () => {
-    const phoneNumber = "573023917253"; 
+    const phoneNumber = "573023917253";
     const text = 
       `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
       `\u{1F464} *Nombre:* ${formData.nombre}\n` +
-      `\u{1F3C3} *Distancia:* ${formData.distancia}\n` + // <-- INFORMACIÓN AGREGADA
+      `\u{1F3C3} *Distancia:* ${formData.distancia}\n` +
       `\u{1F4C4} *Documento:* ${formData.tipoDocumento} - ${formData.numeroDocumento}\n` +
       `\u{1F382} *Edad:* ${formData.edad} anos\n` +
       `\u{1F6BB} *Genero:* ${formData.genero}\n` +
@@ -76,6 +75,7 @@ export function WhyUs() {
     <section id="about" className="bg-background px-5 pb-24 md:px-8 md:pb-32 relative">
       <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card/40 p-6 md:p-12">
         
+        {/* ENCABEZADO */}
         <div className="text-center mb-10">
           <span className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5 text-accent" />
@@ -91,6 +91,7 @@ export function WhyUs() {
           </p>
         </div>
 
+        {/* PASO 1: FORMULARIO */}
         {step === 1 && (
           <form onSubmit={handleNextToPayment} className="space-y-6">
             
@@ -185,7 +186,7 @@ export function WhyUs() {
               </div>
             </div>
 
-            {/* Resto de campos iguales... */}
+            {/* Fila: Género y Talla */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
@@ -222,6 +223,7 @@ export function WhyUs() {
               </div>
             </div>
 
+            {/* Fila: Teléfonos */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
@@ -254,6 +256,7 @@ export function WhyUs() {
               </div>
             </div>
 
+            {/* Fila: EPS y Tipo de Sangre */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
@@ -292,6 +295,7 @@ export function WhyUs() {
               </div>
             </div>
 
+            {/* Enfermedad o Alergia */}
             <div>
               <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
                 ¿Sufre de alguna enfermedad o condición médica? *
@@ -307,6 +311,7 @@ export function WhyUs() {
               />
             </div>
 
+            {/* Consentimiento */}
             <div className="flex items-start gap-3 pt-2">
               <input
                 type="checkbox"
@@ -344,7 +349,7 @@ export function WhyUs() {
           </form>
         )}
 
-        {/* ... El resto de tu código (Paso 2 y Modal) queda igual ... */}
+        {/* PASO 2: PAGO */}
         {step === 2 && (
           <div className="space-y-6 text-center">
             <div className="bg-background border border-border p-6 rounded-2xl max-w-sm mx-auto flex flex-col items-center">
@@ -399,6 +404,7 @@ export function WhyUs() {
         )}
       </div>
 
+      {/* MODAL DE CONSENTIMIENTO */}
       {showConsentModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-card border border-border w-full max-w-2xl max-h-[85vh] rounded-3xl p-6 md:p-8 flex flex-col shadow-2xl relative">
@@ -411,9 +417,33 @@ export function WhyUs() {
                 <X className="w-5 h-5" />
               </button>
             </div>
+            
             <div className="overflow-y-auto space-y-4 text-xs md:text-sm text-muted-foreground pr-2 leading-relaxed">
-              <p>El contenido del consentimiento permanece igual...</p>
+              <p className="font-semibold text-foreground">
+                Por medio del presente documento, declaro que conozco y acepto los términos y condiciones de participación para el evento deportivo.
+              </p>
+              
+              <p>
+                <strong>1. Exoneración de Responsabilidad:</strong> Reconozco y acepto voluntariamente que la práctica de actividades deportivas conlleva riesgos físicos inherentes. Por lo tanto, <strong>los organizadores, patrocinadores, directores y colaboradores del evento NO se hacen responsables</strong> por accidentes, lesiones físicas, incapacidades, daños materiales, pérdida de pertenencias, ni por ningún tipo de perjuicio personal o de terceros que pueda sufrir antes, durante o después de la carrera.
+              </p>
+
+              <p>
+                <strong>2. Estado de Salud Óptimo:</strong> Certifico bajo la gravedad del juramento que me encuentro en condiciones físicas, médicas y psicológicas óptimas para participar en este evento deportivo. Eximo a la organización de cualquier reclamación derivada de afecciones médicas preexistentes o emergencias de salud que surjan durante el recorrido.
+              </p>
+
+              <p>
+                <strong>3. Atención Médica de Emergencia:</strong> Autorizo al equipo organizador y al personal médico presente a brindarme primeros auxilios y a realizar traslados hospitalarios de emergencia en caso de ser necesario, asumiendo los costos médicos que esto pueda generar.
+              </p>
+
+              <p>
+                <strong>4. Uso de Imagen:</strong> Autorizo de manera libre, voluntaria y gratuita a la organización para capturar y utilizar fotografías, videos y material audiovisual de mi participación en el evento con fines promocionales y de difusión pública.
+              </p>
+
+              <p className="pt-2 text-foreground font-medium">
+                Al marcar la casilla de aceptación en el formulario, confirmo que he leído detenidamente este documento, comprendo su contenido en su totalidad y asumo la responsabilidad absoluta de mi participación.
+              </p>
             </div>
+
             <div className="border-t border-border pt-4 mt-6 flex justify-end">
               <button
                 type="button"
