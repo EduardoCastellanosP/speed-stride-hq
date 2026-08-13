@@ -19,7 +19,7 @@ export const BRAND = {
 
 export const HERO = {
   // 👇 Cambia esta URL por tu video
-  videoUrl: "/public/hero.mp4",
+  videoUrl: "/hero.mp4",
   // posterUrl: servicePlans,
   ratingText: "200+ MIEMBROS ACTIVOS",
   title: "ASTREA SE MUEVE 2.0",
