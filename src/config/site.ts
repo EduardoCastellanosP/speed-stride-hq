@@ -3,7 +3,7 @@
  *  EDIT EVERYTHING HERE — textos, imágenes y video de la landing
  * ─────────────────────────────────────────────────────────────
  */
-import servicePlans from "@/assets/service-plans.jpg";
+import servicePlans from "@/assets/Gemini_Generated_Image_rzpfihrzpfihrzpf.png";
 import serviceAnalysis from "@/assets/service-analysis.jpg";
 import serviceRace from "@/assets/service-race.jpg";
 import teamImage from "@/assets/team.jpg";
@@ -11,81 +11,83 @@ import founderImage from "@/assets/founder.jpg";
 
 export const BRAND = {
   name: "WhyUs",
-  ctaNav: "USE FOR FREE",
   links: [
     { label: "HOME", href: "#home" },
-    { label: "ABOUT", href: "#about" },
-    { label: "PRICING", href: "#pricing" },
-    { label: "CONTACT", href: "#contact" },
+    { label: "INFORMACION", href: "#about" },
+    { label: "PRECIO", href: "#pricing" },
+    { label: "CONTACTO", href: "#contact" },
   ],
 };
 
 export const HERO = {
   // 👇 Cambia esta URL por tu video
-  videoUrl: "https://cdn.coverr.co/videos/coverr-running-on-a-track-1080p.mp4",
-  posterUrl: servicePlans,
-  ratingText: "200+ ACTIVE MEMBERS",
-  title: "UNLOCK YOUR TRUE POTENTIAL",
-  subtitle: "Custom coaching that transforms good runners into elite athletes.",
-  cta: "BOOK A CALL",
+  videoUrl: "/src/assets/Athletes_running_on_track_202608130008.mp4",
+  // posterUrl: servicePlans,
+  ratingText: "200+ MIEMBROS ACTIVOS",
+  title: "ASTREA SE MUEVE 2.0",
+  subtitle: "Corremos por salud, por pasión y por diversión. Únete a nuestra comunidad y mejora tu rendimiento.",
+  cta: "APARTA TU LUGAR", Href: "#contact",
+  
 };
 
-export const STATS = {
-  title: "WE TURN EVERYDAY RUNNERS INTO FIERCE COMPETITORS",
-  items: [
-    { value: "89%", label: "Achieved a New PR" },
-    { value: "650+", label: "Athletes Transformed" },
-    { value: "150+", label: "Podium Finishes" },
-  ],
-};
+// export const STATS = {
+//   title: "WE TURN EVERYDAY RUNNERS INTO FIERCE COMPETITORS",
+//   items: [
+//     { value: "89%", label: "Achieved a New PR" },
+//     { value: "650+", label: "Athletes Transformed" },
+//     { value: "150+", label: "Podium Finishes" },
+//   ],
+// };
 
 export const MARQUEE_ITEMS = [
-  "TRAINING PLANS",
-  "TECHNIQUE ANALYSIS",
-  "RACE STRATEGIES",
+ "PLANES DE ENTRENAMIENTO",
+
+"ANÁLISIS TÉCNICO",
+
+"ESTRATEGIAS DE CARRERA",
 ];
 
-export const SERVICES = {
-  eyebrow: "Our Services",
-  title: "EVERYTHING YOU NEED TO CRUSH YOUR NEXT RACE",
-  cta: "GET STARTED",
-  cards: [
-    {
-      icon: "Footprints",
-      title: "PERSONALIZED TRAINING PLANS",
-      image: servicePlans,
-      bullets: [
-        "Race-based weekly workouts",
-        "Race-specific progression",
-        "Mobile app delivery",
-      ],
-    },
-    {
-      icon: "ClipboardList",
-      title: "ELITE TECHNIQUE ANALYSIS",
-      image: serviceAnalysis,
-      bullets: [
-        "Smart / Garmin video review",
-        "Form breakdown + fixes",
-        "Weekly live Q&A calls",
-      ],
-    },
-    {
-      icon: "Medal",
-      title: "COMPLETE RACE STRATEGIES",
-      image: serviceRace,
-      bullets: [
-        "Race week nutrition plan",
-        "Pace splits calculator",
-        "Mental preparation",
-      ],
-    },
-  ],
-};
+// export const SERVICES = {
+//   eyebrow: "Our Services",
+//   title: "EVERYTHING YOU NEED TO CRUSH YOUR NEXT RACE",
+//   cta: "GET STARTED",
+//   cards: [
+//     {
+//       icon: "Footprints",
+//       title: "PERSONALIZED TRAINING PLANS",
+//       image: servicePlans,
+//       bullets: [
+//         "Race-based weekly workouts",
+//         "Race-specific progression",
+//         "Mobile app delivery",
+//       ],
+//     },
+//     {
+//       icon: "ClipboardList",
+//       title: "ELITE TECHNIQUE ANALYSIS",
+//       image: serviceAnalysis,
+//       bullets: [
+//         "Smart / Garmin video review",
+//         "Form breakdown + fixes",
+//         "Weekly live Q&A calls",
+//       ],
+//     },
+//     {
+//       icon: "Medal",
+//       title: "COMPLETE RACE STRATEGIES",
+//       image: serviceRace,
+//       bullets: [
+//         "Race week nutrition plan",
+//         "Pace splits calculator",
+//         "Mental preparation",
+//       ],
+//     },
+//   ],
+// };
 
 export const WHY_US = {
-  eyebrow: "Why Us",
-  title: "A SMARTER WAY TO IMPROVE",
+  eyebrow: "UNA FORMA MÁS INTELIGENTE DE MEJORAR",
+  title: "FORMULARIO DE INSCRIPCIÓN",
   image: teamImage,
   left: [
     {
