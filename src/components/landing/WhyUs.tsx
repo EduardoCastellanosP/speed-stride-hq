@@ -1,6 +1,16 @@
 import React, { useState } from "react";
-import { Send, Sparkles, ArrowLeft, QrCode, CheckCircle2, FileText, X, Download } from "lucide-react";
+import { Send, Sparkles, ArrowLeft, QrCode, CheckCircle2, FileText, X, Download, Check } from "lucide-react";
 import qrNequi from "@/assets/Qr recortado.png";
+
+// Precios por categoría (ajusta aquí si el valor real es distinto)
+const PRECIOS: Record<string, number> = {
+  "Niño": 90000,
+  "Adulto": 110000,
+  "Grupal": 90000,
+};
+
+const TALLAS_NINO = ["6", "7", "8", "9", "10", "11", "12"];
+const TALLAS_ADULTO = ["XS", "S", "M", "L", "XL"];
 
 export function WhyUs() {
   const [step, setStep] = useState<1 | 2>(1);
@@ -10,11 +20,13 @@ export function WhyUs() {
     consentimiento: false,
     nombre: "",
     distancia: "",
+    categoria: "", // "Niño" | "Adulto" | "Grupal"
     tipoDocumento: "CC",
     numeroDocumento: "",
     edad: "",
     genero: "Masculino",
     talla: "M",
+    tipoPrenda: "Camisa", // "Camisa" | "Camisilla" | "Top"
     telefono: "",
     telefonoEmergencia: "",
     enfermedad: "",
@@ -32,10 +44,30 @@ export function WhyUs() {
     }
   };
 
+  // Al elegir categoría, ajustamos la talla por defecto según corresponda
+  const handleSelectCategoria = (categoria: string) => {
+    const nuevaTalla = categoria === "Niño" ? TALLAS_NINO[0] : TALLAS_ADULTO[2]; // "M" por defecto en adulto
+    setFormData({ ...formData, categoria, talla: nuevaTalla });
+  };
+
+  // Opciones de tipo de prenda según el género
+  const opcionesPrenda =
+    formData.genero === "Masculino"
+      ? ["Camisa", "Camisilla"]
+      : formData.genero === "Femenino"
+      ? ["Camisa", "Top"]
+      : ["Camisa", "Camisilla", "Top"];
+
+  // Opciones de talla según la categoría
+  const opcionesTalla = formData.categoria === "Niño" ? TALLAS_NINO : TALLAS_ADULTO;
+
+  const precioSeleccionado = formData.categoria ? PRECIOS[formData.categoria] : null;
+
   const isFormValid =
     formData.consentimiento === true &&
     formData.nombre.trim() !== "" &&
     formData.distancia !== "" &&
+    formData.categoria !== "" &&
     formData.numeroDocumento.trim() !== "" &&
     formData.edad.trim() !== "" &&
     formData.telefono.trim() !== "" &&
@@ -52,14 +84,20 @@ export function WhyUs() {
 
   const handleSendToWhatsApp = () => {
     const phoneNumber = "573023917253";
-    const text = 
+    const precioTexto = precioSeleccionado
+      ? `$${precioSeleccionado.toLocaleString("es-CO")}`
+      : "N/A";
+
+    const text =
       `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
       `\u{1F464} *Nombre:* ${formData.nombre}\n` +
       `\u{1F3C3} *Distancia:* ${formData.distancia}\n` +
+      `\u{1F3F7}\u{FE0F} *Categoria:* ${formData.categoria} (${precioTexto})\n` +
       `\u{1F4C4} *Documento:* ${formData.tipoDocumento} - ${formData.numeroDocumento}\n` +
       `\u{1F382} *Edad:* ${formData.edad} anos\n` +
       `\u{1F6BB} *Genero:* ${formData.genero}\n` +
       `\u{1F455} *Talla:* ${formData.talla}\n` +
+      `\u{1F455} *Tipo de prenda:* ${formData.tipoPrenda}\n` +
       `\u{1F4F1} *Telefono:* ${formData.telefono}\n` +
       `\u{1F6A8} *Contacto de Emergencia:* ${formData.telefonoEmergencia}\n` +
       `\u{1F3E5} *EPS:* ${formData.eps}\n` +
@@ -74,7 +112,7 @@ export function WhyUs() {
   return (
     <section id="about" className="bg-background px-5 pb-24 md:px-8 md:pb-32 relative">
       <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-card/40 p-6 md:p-12">
-        
+
         {/* ENCABEZADO */}
         <div className="text-center mb-10">
           <span className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
@@ -85,268 +123,334 @@ export function WhyUs() {
             {step === 1 ? "FORMULARIO DE INSCRIPCIÓN" : "REALIZA TU PAGO"}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            {step === 1 
-              ? "Completa todos los campos obligatorios para avanzar." 
+            {step === 1
+              ? "Completa todos los campos obligatorios para avanzar."
               : "Escanea el código QR de Nequi o descárgalo para pagar."}
           </p>
         </div>
 
         {/* PASO 1: FORMULARIO */}
         {step === 1 && (
-          <form onSubmit={handleNextToPayment} className="space-y-6">
-            
-            {/* Nombre Completo */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                Nombre Completo *
+          <>
+            {/* TARJETAS DE PRECIO POR CATEGORÍA */}
+            <div className="mb-10">
+              <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3 text-center">
+                Selecciona tu categoría *
               </label>
-              <input
-                type="text"
-                name="nombre"
-                required
-                value={formData.nombre}
-                onChange={handleChange}
-                placeholder="Ej. Carlos Pérez"
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                {Object.entries(PRECIOS).map(([categoria, precio]) => {
+                  const isSelected = formData.categoria === categoria;
+                  return (
+                    <button
+                      key={categoria}
+                      type="button"
+                      onClick={() => handleSelectCategoria(categoria)}
+                      className={`relative flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-4 py-6 transition-all duration-300 cursor-pointer ${
+                        isSelected
+                          ? "border-green-500 bg-green-500/10 shadow-[0_10px_30px_-8px_rgba(34,197,94,0.55)] -translate-y-1"
+                          : "border-border bg-background shadow-[0_8px_20px_-10px_rgba(34,197,94,0.25)] hover:-translate-y-1 hover:shadow-[0_12px_28px_-10px_rgba(34,197,94,0.4)]"
+                      }`}
+                    >
+                      {isSelected && (
+                        <span className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-white shadow-md">
+                          <Check className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                      <span className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground">
+                        {categoria}
+                      </span>
+                      <span className="text-2xl font-black text-foreground">
+                        ${precio.toLocaleString("es-CO")}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* TARJETAS DE SELECCIÓN DE DISTANCIA */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
-                Selecciona tu distancia *
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                {["3K", "7K"].map((distancia) => (
-                  <button
-                    key={distancia}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, distancia })}
-                    className={`py-4 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                      formData.distancia === distancia
-                        ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
-                        : "border-border bg-background text-muted-foreground hover:border-accent/50"
-                    }`}
+            <form onSubmit={handleNextToPayment} className="space-y-6">
+
+              {/* Nombre Completo */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                  Nombre Completo *
+                </label>
+                <input
+                  type="text"
+                  name="nombre"
+                  required
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  placeholder="Ej. Carlos Pérez"
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* TARJETAS DE SELECCIÓN DE DISTANCIA */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                  Selecciona tu distancia *
+                </label>
+                <div className="grid grid-cols-2 gap-4">
+                  {["3K", "7K"].map((distancia) => (
+                    <button
+                      key={distancia}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, distancia })}
+                      className={`py-4 rounded-xl border-2 font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                        formData.distancia === distancia
+                          ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                          : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                      }`}
+                    >
+                      {distancia}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fila: Tipo de Documento, Número de Documento y Edad */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Tipo de Documento *
+                  </label>
+                  <select
+                    name="tipoDocumento"
+                    value={formData.tipoDocumento}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
                   >
-                    {distancia}
-                  </button>
-                ))}
-              </div>
-            </div>
+                    <option value="CC">Cédula (CC)</option>
+                    <option value="TI">Tarjeta de Identidad (TI)</option>
+                    <option value="CE">Cédula Extranjería (CE)</option>
+                    <option value="Pasaporte">Pasaporte</option>
+                  </select>
+                </div>
 
-            {/* Fila: Tipo de Documento, Número de Documento y Edad */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Nº de Documento *
+                  </label>
+                  <input
+                    type="text"
+                    name="numeroDocumento"
+                    required
+                    value={formData.numeroDocumento}
+                    onChange={handleChange}
+                    placeholder="Ej. 1098765432"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Edad *
+                  </label>
+                  <input
+                    type="number"
+                    name="edad"
+                    required
+                    min="1"
+                    max="120"
+                    value={formData.edad}
+                    onChange={handleChange}
+                    placeholder="Ej. 28"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Fila: Género y Talla (dinámica según categoría) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Género *
+                  </label>
+                  <select
+                    name="genero"
+                    value={formData.genero}
+                    onChange={(e) => {
+                      const genero = e.target.value;
+                      const nuevasOpciones =
+                        genero === "Masculino" ? ["Camisa", "Camisilla"] : genero === "Femenino" ? ["Camisa", "Top"] : ["Camisa", "Camisilla", "Top"];
+                      setFormData({ ...formData, genero, tipoPrenda: nuevasOpciones[0] });
+                    }}
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  >
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Talla {formData.categoria === "Niño" ? "(Niño, 6 a 12)" : "(XS a XL)"} *
+                  </label>
+                  <select
+                    name="talla"
+                    value={formData.talla}
+                    onChange={handleChange}
+                    disabled={!formData.categoria}
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
+                  >
+                    {!formData.categoria && <option value="">Primero selecciona una categoría</option>}
+                    {opcionesTalla.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Tipo de prenda (según género) */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                  Tipo de prenda *
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {opcionesPrenda.map((prenda) => (
+                    <button
+                      key={prenda}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, tipoPrenda: prenda })}
+                      className={`py-3 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
+                        formData.tipoPrenda === prenda
+                          ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                          : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                      }`}
+                    >
+                      {prenda}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Fila: Teléfonos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Teléfono / WhatsApp *
+                  </label>
+                  <input
+                    type="tel"
+                    name="telefono"
+                    required
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    placeholder="Ej. +57 300 1234567"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Teléfono de Emergencia *
+                  </label>
+                  <input
+                    type="tel"
+                    name="telefonoEmergencia"
+                    required
+                    value={formData.telefonoEmergencia}
+                    onChange={handleChange}
+                    placeholder="Contacto en caso de emergencia"
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Fila: EPS y Tipo de Sangre */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    EPS *
+                  </label>
+                  <input
+                    type="text"
+                    name="eps"
+                    required
+                    value={formData.eps}
+                    onChange={handleChange}
+                    placeholder="Ej. Sura, Sanitas, etc."
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                    Tipo de Sangre *
+                  </label>
+                  <select
+                    name="tipoSangre"
+                    value={formData.tipoSangre}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  >
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Enfermedad o Alergia */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Tipo de Documento *
+                  ¿Sufre de alguna enfermedad o condición médica? *
                 </label>
-                <select
-                  name="tipoDocumento"
-                  value={formData.tipoDocumento}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                >
-                  <option value="CC">Cédula (CC)</option>
-                  <option value="TI">Tarjeta de Identidad (TI)</option>
-                  <option value="CE">Cédula Extranjería (CE)</option>
-                  <option value="Pasaporte">Pasaporte</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Nº de Documento *
-                </label>
-                <input
-                  type="text"
-                  name="numeroDocumento"
+                <textarea
+                  name="enfermedad"
                   required
-                  value={formData.numeroDocumento}
+                  rows={2}
+                  value={formData.enfermedad}
                   onChange={handleChange}
-                  placeholder="Ej. 1098765432"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  placeholder="Escriba 'Ninguna' si no padece ninguna, o detalle su condición..."
+                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors resize-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Edad *
-                </label>
+              {/* Consentimiento */}
+              <div className="flex items-start gap-3 pt-2">
                 <input
-                  type="number"
-                  name="edad"
+                  type="checkbox"
+                  name="consentimiento"
+                  id="consentimiento"
                   required
-                  min="1"
-                  max="120"
-                  value={formData.edad}
+                  checked={formData.consentimiento}
                   onChange={handleChange}
-                  placeholder="Ej. 28"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                  className="mt-1 h-4 w-4 rounded border-border accent-accent text-accent-foreground focus:ring-accent cursor-pointer"
                 />
-              </div>
-            </div>
-
-            {/* Fila: Género y Talla */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Género *
+                <label htmlFor="consentimiento" className="text-xs text-muted-foreground leading-relaxed">
+                  He leído y acepto el{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowConsentModal(true)}
+                    className="text-foreground font-semibold underline hover:text-accent transition-colors inline-block cursor-pointer"
+                  >
+                    consentimiento informado y exoneración de responsabilidad
+                  </button>{" "}
+                  para participar en el evento. *
                 </label>
-                <select
-                  name="genero"
-                  value={formData.genero}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                >
-                  <option value="Masculino">Masculino</option>
-                  <option value="Femenino">Femenino</option>
-                  <option value="Otro">Otro</option>
-                </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Talla de Camisa *
-                </label>
-                <select
-                  name="talla"
-                  value={formData.talla}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                >
-                  <option value="XS">XS</option>
-                  <option value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Fila: Teléfonos */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Teléfono / WhatsApp *
-                </label>
-                <input
-                  type="tel"
-                  name="telefono"
-                  required
-                  value={formData.telefono}
-                  onChange={handleChange}
-                  placeholder="Ej. +57 300 1234567"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Teléfono de Emergencia *
-                </label>
-                <input
-                  type="tel"
-                  name="telefonoEmergencia"
-                  required
-                  value={formData.telefonoEmergencia}
-                  onChange={handleChange}
-                  placeholder="Contacto en caso de emergencia"
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                />
-              </div>
-            </div>
-
-            {/* Fila: EPS y Tipo de Sangre */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  EPS *
-                </label>
-                <input
-                  type="text"
-                  name="eps"
-                  required
-                  value={formData.eps}
-                  onChange={handleChange}
-                  placeholder="Ej. Sura, Sanitas, etc."
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                  Tipo de Sangre *
-                </label>
-                <select
-                  name="tipoSangre"
-                  value={formData.tipoSangre}
-                  onChange={handleChange}
-                  className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                >
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Enfermedad o Alergia */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                ¿Sufre de alguna enfermedad o condición médica? *
-              </label>
-              <textarea
-                name="enfermedad"
-                required
-                rows={2}
-                value={formData.enfermedad}
-                onChange={handleChange}
-                placeholder="Escriba 'Ninguna' si no padece ninguna, o detalle su condición..."
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors resize-none"
-              />
-            </div>
-
-            {/* Consentimiento */}
-            <div className="flex items-start gap-3 pt-2">
-              <input
-                type="checkbox"
-                name="consentimiento"
-                id="consentimiento"
-                required
-                checked={formData.consentimiento}
-                onChange={handleChange}
-                className="mt-1 h-4 w-4 rounded border-border accent-accent text-accent-foreground focus:ring-accent cursor-pointer"
-              />
-              <label htmlFor="consentimiento" className="text-xs text-muted-foreground leading-relaxed">
-                He leído y acepto el{" "}
-                <button
-                  type="button"
-                  onClick={() => setShowConsentModal(true)}
-                  className="text-foreground font-semibold underline hover:text-accent transition-colors inline-block cursor-pointer"
-                >
-                  consentimiento informado y exoneración de responsabilidad
-                </button>{" "}
-                para participar en el evento. *
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              disabled={!isFormValid}
-              className={`w-full py-4 rounded-xl font-bold uppercase tracking-[0.1em] text-sm flex items-center justify-center gap-2 transition-all ${
-                isFormValid
-                  ? "bg-accent text-accent-foreground hover:scale-[1.01] cursor-pointer shadow-lg shadow-accent/20"
-                  : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
-              }`}
-            >
-              Continuar al Pago
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={!isFormValid}
+                className={`w-full py-4 rounded-xl font-bold uppercase tracking-[0.1em] text-sm flex items-center justify-center gap-2 transition-all ${
+                  isFormValid
+                    ? "bg-accent text-accent-foreground hover:scale-[1.01] cursor-pointer shadow-lg shadow-accent/20"
+                    : "bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                }`}
+              >
+                Continuar al Pago
+              </button>
+            </form>
+          </>
         )}
 
         {/* PASO 2: PAGO */}
@@ -360,12 +464,18 @@ export function WhyUs() {
               <p className="text-xs text-muted-foreground mt-1 mb-4">
                 Escanea el código QR desde tu app Nequi o descárgalo para realizar el pago.
               </p>
+              {precioSeleccionado && (
+                <div className="mb-4 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total a pagar</span>
+                  <p className="text-xl font-black text-green-600">${precioSeleccionado.toLocaleString("es-CO")}</p>
+                </div>
+              )}
               <h2 className="text-2xl font-black text-accent mb-4">Llave Bre-b <br /> 3023917253</h2>
               <div className="w-56 h-56 bg-[#280D3B] rounded-2xl border-4 border-border flex items-center justify-center p-3 shadow-inner overflow-hidden relative">
                 <img src={qrNequi} alt="QR Nequi" className="w-full h-full object-contain rounded-xl" />
               </div>
-              <a 
-                href={qrNequi} 
+              <a
+                href={qrNequi}
                 download="QR-Nequi-Katiusca.jpg"
                 className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-accent bg-accent/10 hover:bg-accent/20 px-4 py-2.5 rounded-xl transition-colors cursor-pointer"
               >
@@ -417,12 +527,12 @@ export function WhyUs() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="overflow-y-auto space-y-4 text-xs md:text-sm text-muted-foreground pr-2 leading-relaxed">
               <p className="font-semibold text-foreground">
                 Por medio del presente documento, declaro que conozco y acepto los términos y condiciones de participación para el evento deportivo.
               </p>
-              
+
               <p>
                 <strong>1. Exoneración de Responsabilidad:</strong> Reconozco y acepto voluntariamente que la práctica de actividades deportivas conlleva riesgos físicos inherentes. Por lo tanto, <strong>los organizadores, patrocinadores, directores y colaboradores del evento NO se hacen responsables</strong> por accidentes, lesiones físicas, incapacidades, daños materiales, pérdida de pertenencias, ni por ningún tipo de perjuicio personal o de terceros que pueda sufrir antes, durante o después de la carrera.
               </p>
