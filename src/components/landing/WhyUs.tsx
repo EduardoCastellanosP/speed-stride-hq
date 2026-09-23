@@ -12,6 +12,47 @@ const PRECIOS: Record<string, number> = {
 const TALLAS_NINO = ["6", "7", "8", "9", "10", "11", "12"];
 const TALLAS_ADULTO = ["XS", "S", "M", "L", "XL"];
 
+function Stepper({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card/40 px-4 py-3">
+      <span className="block text-[11px] font-bold uppercase tracking-[0.1em] text-muted-foreground mb-2">
+        {label}
+      </span>
+      <div className="flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => onChange(value - 1)}
+          className="h-8 w-8 rounded-lg border border-border text-foreground font-bold hover:border-accent cursor-pointer"
+        >
+          −
+        </button>
+        <input
+          type="number"
+          min={0}
+          value={value}
+          onChange={(e) => onChange(parseInt(e.target.value, 10))}
+          className="w-14 bg-transparent text-center text-lg font-black text-foreground focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => onChange(value + 1)}
+          className="h-8 w-8 rounded-lg border border-border text-foreground font-bold hover:border-accent cursor-pointer"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function WhyUs() {
   const [step, setStep] = useState<1 | 2>(1);
   const [showConsentModal, setShowConsentModal] = useState(false);
@@ -33,6 +74,24 @@ export function WhyUs() {
     eps: "",
     tipoSangre: "O+",
   });
+
+  // Desglose para categoría "Grupal": cuántas personas, cuántas mujeres/hombres,
+  // y cómo se reparte la prenda dentro de cada género (sin elegir por individuo)
+  const [grupo, setGrupo] = useState({
+    total: 0,
+    mujeres: 0,
+    hombres: 0,
+    prendaMujeres: "Top" as "Top" | "Camisa",
+    prendaHombres: "Camisa" as "Camisa" | "Camisilla",
+  });
+
+  const updateGrupo = (campo: "total" | "mujeres" | "hombres", valor: number) => {
+    const v = Math.max(0, isNaN(valor) ? 0 : valor);
+    setGrupo({ ...grupo, [campo]: v });
+  };
+
+  const grupoGeneroOk = grupo.mujeres + grupo.hombres === grupo.total;
+  const grupoValido = formData.categoria !== "Grupal" || (grupo.total > 0 && grupoGeneroOk);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -73,7 +132,8 @@ export function WhyUs() {
     formData.telefono.trim() !== "" &&
     formData.telefonoEmergencia.trim() !== "" &&
     formData.eps.trim() !== "" &&
-    formData.enfermedad.trim() !== "";
+    formData.enfermedad.trim() !== "" &&
+    grupoValido;
 
   const handleNextToPayment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +148,15 @@ export function WhyUs() {
       ? `$${precioSeleccionado.toLocaleString("es-CO")}`
       : "N/A";
 
+    const detalleGrupo =
+      formData.categoria === "Grupal"
+        ? `\u{1F465} *Total del grupo:* ${grupo.total} personas\n` +
+          (grupo.mujeres > 0 ? `\u{1F469} *Mujeres:* ${grupo.mujeres} (todas llevan: ${grupo.prendaMujeres})\n` : "") +
+          (grupo.hombres > 0 ? `\u{1F468} *Hombres:* ${grupo.hombres} (todos llevan: ${grupo.prendaHombres})\n` : "")
+        : `\u{1F6BB} *Genero:* ${formData.genero}\n` +
+          `\u{1F455} *Talla:* ${formData.talla}\n` +
+          `\u{1F455} *Tipo de prenda:* ${formData.tipoPrenda}\n`;
+
     const text =
       `*INSCRIPCION OFICIAL - ASTREA*\n\n` +
       `\u{1F464} *Nombre:* ${formData.nombre}\n` +
@@ -95,9 +164,7 @@ export function WhyUs() {
       `\u{1F3F7}\u{FE0F} *Categoria:* ${formData.categoria} (${precioTexto})\n` +
       `\u{1F4C4} *Documento:* ${formData.tipoDocumento} - ${formData.numeroDocumento}\n` +
       `\u{1F382} *Edad:* ${formData.edad} anos\n` +
-      `\u{1F6BB} *Genero:* ${formData.genero}\n` +
-      `\u{1F455} *Talla:* ${formData.talla}\n` +
-      `\u{1F455} *Tipo de prenda:* ${formData.tipoPrenda}\n` +
+      detalleGrupo +
       `\u{1F4F1} *Telefono:* ${formData.telefono}\n` +
       `\u{1F6A8} *Contacto de Emergencia:* ${formData.telefonoEmergencia}\n` +
       `\u{1F3E5} *EPS:* ${formData.eps}\n` +
@@ -261,70 +328,154 @@ export function WhyUs() {
                 </div>
               </div>
 
-              {/* Fila: Género y Talla (dinámica según categoría) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                    Género *
-                  </label>
-                  <select
-                    name="genero"
-                    value={formData.genero}
-                    onChange={(e) => {
-                      const genero = e.target.value;
-                      const nuevasOpciones =
-                        genero === "Masculino" ? ["Camisa", "Camisilla"] : genero === "Femenino" ? ["Camisa", "Top"] : ["Camisa", "Camisilla", "Top"];
-                      setFormData({ ...formData, genero, tipoPrenda: nuevasOpciones[0] });
-                    }}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
-                  >
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
+              {formData.categoria !== "Grupal" && (
+                <>
+                  {/* Fila: Género y Talla (dinámica según categoría) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                        Género *
+                      </label>
+                      <select
+                        name="genero"
+                        value={formData.genero}
+                        onChange={(e) => {
+                          const genero = e.target.value;
+                          const nuevasOpciones =
+                            genero === "Masculino" ? ["Camisa", "Camisilla"] : genero === "Femenino" ? ["Camisa", "Top"] : ["Camisa", "Camisilla", "Top"];
+                          setFormData({ ...formData, genero, tipoPrenda: nuevasOpciones[0] });
+                        }}
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors"
+                      >
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                      </select>
+                    </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
-                    Talla {formData.categoria === "Niño" ? "(Niño, 6 a 12)" : "(XS a XL)"} *
-                  </label>
-                  <select
-                    name="talla"
-                    value={formData.talla}
-                    onChange={handleChange}
-                    disabled={!formData.categoria}
-                    className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
-                  >
-                    {!formData.categoria && <option value="">Primero selecciona una categoría</option>}
-                    {opcionesTalla.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-2">
+                        Talla {formData.categoria === "Niño" ? "(Niño, 6 a 12)" : "(XS a XL)"} *
+                      </label>
+                      <select
+                        name="talla"
+                        value={formData.talla}
+                        onChange={handleChange}
+                        disabled={!formData.categoria}
+                        className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
+                      >
+                        {!formData.categoria && <option value="">Primero selecciona una categoría</option>}
+                        {opcionesTalla.map((t) => (
+                          <option key={t} value={t}>{t}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
 
-              {/* Tipo de prenda (según género) */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
-                  Tipo de prenda *
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {opcionesPrenda.map((prenda) => (
-                    <button
-                      key={prenda}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, tipoPrenda: prenda })}
-                      className={`py-3 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
-                        formData.tipoPrenda === prenda
-                          ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
-                          : "border-border bg-background text-muted-foreground hover:border-accent/50"
-                      }`}
-                    >
-                      {prenda}
-                    </button>
-                  ))}
+                  {/* Tipo de prenda (según género) */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                      Tipo de prenda *
+                    </label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {opcionesPrenda.map((prenda) => (
+                        <button
+                          key={prenda}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, tipoPrenda: prenda })}
+                          className={`py-3 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
+                            formData.tipoPrenda === prenda
+                              ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                              : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                          }`}
+                        >
+                          {prenda}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {formData.categoria === "Grupal" && (
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                      Composición del grupo *
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Stepper
+                        label="Total de personas"
+                        value={grupo.total}
+                        onChange={(v) => updateGrupo("total", v)}
+                      />
+                      <Stepper
+                        label="Mujeres"
+                        value={grupo.mujeres}
+                        onChange={(v) => updateGrupo("mujeres", v)}
+                      />
+                      <Stepper
+                        label="Hombres"
+                        value={grupo.hombres}
+                        onChange={(v) => updateGrupo("hombres", v)}
+                      />
+                    </div>
+                    {!grupoGeneroOk && grupo.total > 0 && (
+                      <p className="mt-2 text-xs font-semibold text-red-500">
+                        Mujeres + Hombres debe ser igual al total de personas ({grupo.total}).
+                      </p>
+                    )}
+                  </div>
+
+                  {grupo.mujeres > 0 && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                        Prenda para todas las mujeres del grupo ({grupo.mujeres}) *
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {(["Top", "Camisa"] as const).map((opcion) => (
+                          <button
+                            key={opcion}
+                            type="button"
+                            onClick={() => setGrupo({ ...grupo, prendaMujeres: opcion })}
+                            className={`py-3 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
+                              grupo.prendaMujeres === opcion
+                                ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            {opcion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {grupo.hombres > 0 && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-[0.1em] text-foreground mb-3">
+                        Prenda para todos los hombres del grupo ({grupo.hombres}) *
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {(["Camisa", "Camisilla"] as const).map((opcion) => (
+                          <button
+                            key={opcion}
+                            type="button"
+                            onClick={() => setGrupo({ ...grupo, prendaHombres: opcion })}
+                            className={`py-3 rounded-xl border-2 font-bold text-sm transition-all cursor-pointer ${
+                              grupo.prendaHombres === opcion
+                                ? "bg-accent border-accent text-accent-foreground shadow-lg shadow-accent/20"
+                                : "border-border bg-background text-muted-foreground hover:border-accent/50"
+                            }`}
+                          >
+                            {opcion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               {/* Fila: Teléfonos */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
